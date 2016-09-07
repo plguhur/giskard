@@ -143,7 +143,7 @@ module Bot
 		def get_reset(msg, user)
 			Bot.log.info "#{__method__} #{msg.text}"
 			_locale                 = self.get_locale(user)
-			user.state['current']   = "home/welcome"
+			user.state['current']   = "houston/welcome"
 			_screen                 = self.find_by_name(user.state['current'], _locale)
 			_screen                 = self.get_screen(_screen,user,msg)
 		end
