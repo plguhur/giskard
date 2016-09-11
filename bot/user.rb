@@ -26,6 +26,7 @@ module Bot
 		attr_accessor :first_name
 		attr_accessor :last_name
 		attr_accessor :username
+		attr_accessor :mail
 		attr_accessor :settings
 		attr_accessor :bot_upgrade
 		attr_accessor :bot

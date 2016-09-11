@@ -28,9 +28,13 @@ module Bot
 				"dbname"=>DBNAME,
 				"user"=>DBUSER,
 				"password"=>DBPWD,
-				"host"=>DBHOST, 
+				"host"=>DBHOST,
 				"port"=>DBPORT
 			)
+		end
+
+		def self.is_connected
+			return db.nil?
 		end
 
 		def self.load_queries
@@ -47,7 +51,7 @@ module Bot
 
 		def self.query(name,params)
 			Bot.log.info "#{__method__}: #{name} / values: #{params}"
-			@@db.exec_params(@@queries[name],params)
+			return @@db.exec_params(@@queries[name],params)
 		end
 	end
 end
