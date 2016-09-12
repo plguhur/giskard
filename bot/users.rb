@@ -22,19 +22,44 @@
 module Bot
 	class Users
 		def self.load_queries
-			queries={}
+			queries={
+				"users_select" => "SELECT * FROM users",
+				"users_insert"  => "INSERT INTO users (firstname, lastname, email)
+				 				VALUES (?,?,?)"
+			}
 			queries.each { |k,v| Bot::Db.prepare(k,v) }
 		end
 
 		def initialize()
 			@users={}
+			# load results from database
+			if Bot::Db.is_connected then
+				results = Bot::Db.query("users_select")
+				results.each do |row|
+				  user     	  	 = Bot::User.new()
+				  user.firstname = row['firstname']
+				  user.lastname  = row['lastname']
+				  user.mail 	 = row['email']
+				  @users << user
+				end
+			end
 		end
 
 		def add(user)
-			## WARNING ## 
+			## WARNING ##
 			# This is for example purpose only and will work with only 1 unicorn process.
 			# If you use more than 1 unicorn process, you should save users in shared memory or a database to ensure data consistency between unicorn processes.
-			return 
+
+			if Bot::Db.is_connected then
+				params = {
+					'firstname' => user.firstname,
+					'lastname' => user.lastname,
+					'mail' => user.mail
+				 }
+				Bot::Db.query("users_insert", params)
+				end
+			end
+			return
 		end
 
 		# given a User instance with a Bot name and an ID, we look into the database to load missing informations, or to create it in the database
