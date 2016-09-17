@@ -34,7 +34,7 @@ module Bot
 		end
 
 		def self.is_connected
-			return db.nil?
+			return unless defined? DBNAME
 		end
 
 		def self.load_queries

@@ -24,11 +24,11 @@ module Bot
 		def self.load_queries
 			queries={
 				"users_select" => "SELECT * FROM users",
-				"users_insert"  => "INSERT INTO users (firstname, lastname, email)
-				 				VALUES (?,?,?)"
+				"users_insert"  => "INSERT INTO users (firstname, lastname, email) VALUES (?,?,?)"
 			}
 			queries.each { |k,v| Bot::Db.prepare(k,v) }
 		end
+
 
 		def initialize()
 			@users={}
@@ -57,7 +57,6 @@ module Bot
 					'mail' => user.mail
 				 }
 				Bot::Db.query("users_insert", params)
-				end
 			end
 			return
 		end
@@ -95,6 +94,5 @@ module Bot
 		def search(query)
 			return @users[query[:target]]
 		end
-
 	end
 end
