@@ -71,17 +71,10 @@ module Giskard
 				end
 			end
 
-			def send_buttons(id,buttons)
+			def send_attachment(id,attachment)
 				Bot.log.info "#{__method__}"
 				payload={"recipient"=>{"id"=>id},
-						"message"=>{"attachment"=>{
-											"type"=>"template",
-											"payload"=>{
-													"template_type" =>"generic",
-													"buttons" 		=> buttons
-													}
-											}
-									}
+						"message"=>{"attachment"=>attachment}
 					}
 				Bot.log.info payload.to_json
 				Giskard::FBMessengerBot.send(payload)
@@ -157,13 +150,12 @@ module Giskard
 					puts messaging
 					id_sender = messaging.sender.id
 					id_receiv = messaging.recipient.id
-					id        = messaging.message.nil? ? nil : messaging.message.mid
-					seq       = messaging.message.nil? ? nil : messaging.message.seq
 					timestamp = messaging.time
+					id 		  = timestamp
 					if not messaging.message.nil? then
 						text      = messaging.message.text
-					elsif not postback.nil? then
-						text      = postback.payload
+					elsif not messaging.postback.nil? then
+						text      = messaging.postback.payload
 					end
 					user     = Bot::User.new()
 					user.id  = id_sender
@@ -171,7 +163,7 @@ module Giskard
 
 					if not text.nil? then
 						# read message
-						msg           = Giskard::Message.new(id, text, seq, FB_BOT_NAME)
+						msg           = Giskard::Message.new(id, text, id, FB_BOT_NAME)
 						msg.timestamp = timestamp
 						screen        = Bot.nav.get(msg, user)
 
@@ -180,10 +172,10 @@ module Giskard
 						if not screen[:elements].nil?
 							send_elements(user.id, screen[:elements])
 						end
-						# send WebView
+						# TODO send WebView
 						Bot.log.info screen
-						if not screen[:buttons].nil?
-							send_buttons(user.id, screen[:buttons])
+						if not screen[:attachment].nil?
+							send_attachment(user.id, screen[:attachment])
 						end
 					end
 				end

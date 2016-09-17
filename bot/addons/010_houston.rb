@@ -229,53 +229,33 @@ END
 
 	def houston_ask_themes(msg,user,screen)
 		Bot.log.info "#{__method__}"
-		screen[:buttons] = {
-			"type" 					=>"web_url",
-			"url"					=> "https://petersfancyapparel.com/criteria_selector",
-			"title"					=> "Select Criteria",
-			"webview_height_ratio"	=> "full",
-			"messenger_extensions"	=> false,
-			"fallback_url"			=> "https://petersfancyapparel.com/fallback"
-		}
+		# TODO get themes from database
+		screen[:attachment] = {
+		      "type"			=> "template",
+		      "payload" 		=> {
+		        "template_type"		=> "button",
+		        "text"				=> "Themes",
+		        "buttons"			=> [{
+		            "type"				=> "postback",
+		            "title"				=> "Theme 1",
+		            "payload"			=> "tes1"
+		          },
+				  {
+					  "type" 					=> "postback",
+					  "title"					=> "Theme 2",
+					  "payload"				=> "theme_2"
+				  }]
+		      }
+		  }
 		user.next_answer('free_text',1,"houston_save_themes")
 		return self.get_screen(screen,user,msg)
-		#screen=self.find_by_name("houston/save_themes",self.get_locale(user))
+
 	end
 
-	# def houston_save_txt(msg,user,screen)
-	# 	txt=user.state['buffer']
-	# 	Bot.log.info "#{__method__}: #{txt}"
-	# 	# process the text
-	# 	# TODO
-	# 	return self.houston_get_img(msg, user, screen)
-	# end
-	#
-	# def houston_get_img(msg,user,screen)
-	# 	img=user.state['buffer']
-	# 	Bot.log.info "#{__method__}: #{img}"
-	# 	# TODO find the image associated to the user
-	# 	screen=self.find_by_name("houston/get_img",self.get_locale(user))
-	# 	screen[:text]=screen[:text] % {:img=>img}
-	# 	buttons = {}
-	# 	Bot.log.info "#{screen}"
-	# 	user.next_answer('answer')
-	# 	return self.get_screen(screen,user,msg)
-	# end
-	#
-	#
-	# def houston_save_email_cb(msg,user,screen)
-	# 	email=user.state['buffer']
-	# 	Bot.log.info "#{__method__}: #{email}"
-	# 	if email.match(/\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/).nil? then
-	# 		screen=self.find_by_name("houston/email_wrong",self.get_locale(user))
-	# 		screen[:text]=screen[:text] % {:email=>email}
-	# 		return self.get_screen(screen,user,msg)
-	# 	end
-	# 	screen=self.find_by_name("houston/email_saved",self.get_locale(user))
-	# 	screen[:text]=screen[:text] % {:email=>email}
-	# 	return self.get_screen(screen,user,msg)
-	# end
 	def houston_save_themes(screen, usr, msg)
+		# TODO save themes and grievances inside the database
+
+		# create image
 		return screen
 	end
 
