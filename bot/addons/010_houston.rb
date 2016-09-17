@@ -72,7 +72,7 @@ END
 					:welcome_answer=>"/start",
 					:welcome=><<-END,
 Bonjour %{firstname} !
-Je suis Houston. #{Bot.emoticons[:blush]}
+Je suis le robot de LaPrimaire.org. #{Bot.emoticons[:blush]}
 Mon rôle est de noter votre prorité pour améliorer la France.
 Je vous propose à la fin de notre conversation une image à relayer sur les réseaux sociaux.
 Mais assez discuté, commençons !
@@ -121,7 +121,7 @@ END
 				:menu=>{
 					:answer=>"houston/menu_answer",
 					:callback=>"houston/menu",
-					:parse_mode=>"HTML",
+					:parse_mode=>"HTML" ,
 					:kbd=>["houston/ask_img","houston/ask_txt"],
 					:kbd_options=>{:resize_keyboard=>true,:one_time_keyboard=>false,:selective=>true}
 				},
@@ -161,7 +161,21 @@ END
 
 	def houston_welcome(msg,user,screen)
 		Bot.log.info "#{__method__}"
-		screen=self.find_by_name("houston/menu",self.get_locale(user))
+		screen=self.find_by_name("houston/welcome",self.get_locale(user))
+		screen[:elements]= [
+			{
+				:title 		=> "Ecrivez votre doleance",
+				:image_url  => "https://petersfancybrownhats.com/company_image.png",
+			},
+			{
+				"title" 		=> "Example 1",
+				"image_url"  => "https://petersfancybrownhats.com/company_image.png"
+			},
+			{
+				"title" 		=> "Example 2",
+				"image_url"  => "https://petersfancybrownhats.com/company_image.png"
+			}
+		]
 		return self.get_screen(screen,user,msg)
 	end
 
@@ -174,7 +188,7 @@ END
 	def houston_menu(msg,user,screen)
 		Bot.log.info "#{__method__}"
 		screen[:kbd_del]=["houston/menu"] #comment if you want the houston button to be displayed on the houston menu
-		user.next_answer('answer')
+		user.next_answer('free_text')
 		return self.get_screen(screen,user,msg)
 	end
 
@@ -210,6 +224,7 @@ END
 		# TODO find the image associated to the user
 		screen=self.find_by_name("houston/get_img",self.get_locale(user))
 		screen[:text]=screen[:text] % {:img=>img}
+		buttons = {}
 		Bot.log.info "#{screen}"
 		user.next_answer('answer')
 		return self.get_screen(screen,user,msg)

@@ -32,7 +32,7 @@ module Giskard
 			end
 		end
 
-		def self.init() 
+		def self.init()
 			payload={ "setting_type"=>"greeting", "greeting"=>{ "text"=>"Hello, ca fiouze ?" }}
 			Giskard::FBMessengerBot.send(payload,"thread_settings")
 		end
@@ -71,13 +71,29 @@ module Giskard
 				end
 			end
 
+			def send_elements(id,elmts)
+				Bot.log.info "#{__method__}"
+				payload={"recipient"=>{"id"=>id},
+						"message"=>{"attachment"=>{
+											"type"=>"template",
+											"payload"=>{
+													"template_type" =>"generic",
+													"elements" 		=> elmts
+													}
+											}
+									}
+					}
+				Bot.log.info payload
+				Giskard::FBMessengerBot.send(payload)
+			end
+
 			def process_msg(id,msg,options)
 				lines=msg.split("\n")
 				buffer=""
 				max=lines.length
 				idx=0
 				image=false
-				kbd=nil 
+				kbd=nil
 				lines.each do |l|
 					next if l.empty?
 					idx+=1
@@ -93,6 +109,7 @@ module Giskard
 						send_typing(id)
 						send_image(id,l.split(":",2)[1])
 					else # sending 1 msg for every line
+						Bot.log.info "Msg: #{l}"
 						writing_time=l.length/TYPINGSPEED
 						writing_time=l.length/TYPINGSPEED_SLOW if max>1
 						send_typing(id)
@@ -143,11 +160,14 @@ module Giskard
 						msg           = Giskard::Message.new(id, text, seq, FB_BOT_NAME)
 						msg.timestamp = timestamp
 						screen        = Bot.nav.get(msg, user)
+						if not screen[:elements].nil?
+							send_elements(user.id, screen[:elements])
+						end
 						# send answer
 						process_msg(user.id,screen[:text],screen) unless screen[:text].nil?
 					end
 				end
-			end   
+			end
 		end
 	end
 end

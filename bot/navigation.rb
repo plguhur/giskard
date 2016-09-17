@@ -220,7 +220,7 @@ module Bot
 
 		def get_screen(screen,user,msg)
 			Bot.log.info "#{__method__} #{screen[:id]}"
-			return nil,nil if screen.nil?
+			return nil if screen.nil?
 			callback=self.to_callback(screen[:callback].to_s) unless screen[:callback].nil?
 			previous=caller_locations(1,1)[0].label
 			user.state['current'] = screen[:id]
