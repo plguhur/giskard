@@ -71,6 +71,22 @@ module Giskard
 				end
 			end
 
+			def send_buttons(id,buttons)
+				Bot.log.info "#{__method__}"
+				payload={"recipient"=>{"id"=>id},
+						"message"=>{"attachment"=>{
+											"type"=>"template",
+											"payload"=>{
+													"template_type" =>"generic",
+													"buttons" 		=> buttons
+													}
+											}
+									}
+					}
+				Bot.log.info payload.to_json
+				Giskard::FBMessengerBot.send(payload)
+			end
+
 			def send_elements(id,elmts)
 				Bot.log.info "#{__method__}"
 				payload={"recipient"=>{"id"=>id},
@@ -83,7 +99,6 @@ module Giskard
 											}
 									}
 					}
-				Bot.log.info payload
 				Giskard::FBMessengerBot.send(payload)
 			end
 
@@ -109,7 +124,6 @@ module Giskard
 						send_typing(id)
 						send_image(id,l.split(":",2)[1])
 					else # sending 1 msg for every line
-						Bot.log.info "Msg: #{l}"
 						writing_time=l.length/TYPINGSPEED
 						writing_time=l.length/TYPINGSPEED_SLOW if max>1
 						send_typing(id)
@@ -160,11 +174,17 @@ module Giskard
 						msg           = Giskard::Message.new(id, text, seq, FB_BOT_NAME)
 						msg.timestamp = timestamp
 						screen        = Bot.nav.get(msg, user)
+
+						# send answer
+						process_msg(user.id,screen[:text],screen) unless screen[:text].nil?
 						if not screen[:elements].nil?
 							send_elements(user.id, screen[:elements])
 						end
-						# send answer
-						process_msg(user.id,screen[:text],screen) unless screen[:text].nil?
+						# send WebView
+						Bot.log.info screen
+						if not screen[:buttons].nil?
+							send_buttons(user.id, screen[:buttons])
+						end
 					end
 				end
 			end

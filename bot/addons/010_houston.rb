@@ -16,6 +16,8 @@
    limitations under the License.
 =end
 
+$HOUSTON_TEXT_LIM = 200
+
 module Houston
 	def self.included(base)
 		Bot.log.info "loading Houston add-on"
@@ -38,31 +40,31 @@ What do you want to do?
 You can recover a former message, or write a new one.
 Please use the following buttons to give me your choice.
 END
-					:ask_img_answer=>"Recover",
-					:ask_img=><<-END,
-Let me recover your message...
-END
-					:get_img=><<-END,
-Here is your message!
-END
-					:bad_img=><<-END,
-I feel sorry that you don't like the image.  #{Bot.emoticons[:confused]}
-Let's try again.
-END
-					:good_img=><<-END,
-Great! Please share this image on your social networks!
-END
-					:ask_wrong=><<-END,
-Hmmm... I can't recover your former message... #{Bot.emoticons[:confused]}
-Please write a new one.
-END
-					:ask_txt_answer=>"Write",
-					:ask_txt=><<-END,
-According to you, what is the priority in France?
-END
-					:end=><<-END,
-I hope you enjoyed our conversation! See you!
-END
+# 					:ask_img_answer=>"Recover",
+# 					:ask_img=><<-END,
+# Let me recover your message...
+# END
+# 					:get_img=><<-END,
+# Here is your message!
+# END
+# 					:bad_img=><<-END,
+# I feel sorry that you don't like the image.  #{Bot.emoticons[:confused]}
+# Let's try again.
+# END
+# 					:good_img=><<-END,
+# Great! Please share this image on your social networks!
+# END
+# 					:ask_wrong=><<-END,
+# Hmmm... I can't recover your former message... #{Bot.emoticons[:confused]}
+# Please write a new one.
+# END
+# 					:ask_txt_answer=>"Write",
+# 					:ask_txt=><<-END,
+# According to you, what is the priority in France?
+# END
+# 					:end=><<-END,
+# I hope you enjoyed our conversation! See you!
+# END
 				}
 			},
 			:fr=>{
@@ -73,36 +75,36 @@ END
 					:welcome=><<-END,
 Bonjour %{firstname} !
 Je suis le robot de LaPrimaire.org. #{Bot.emoticons[:blush]}
-Mon rôle est de noter votre prorité pour améliorer la France.
-Je vous propose à la fin de notre conversation une image à relayer sur les réseaux sociaux.
-Mais assez discuté, commençons !
 END
 					:menu_answer=>"#{Bot.emoticons[:home]} Accueil",
 					:menu=><<-END,
 Que voulez-vous faire ?
 Utilisez les boutons du menu ci-dessous pour m'indiquer ce que vous souhaitez faire.
 END
-					:ask_img_answer=>"Retrouver",
-					:ask_img=><<-END,
-Je recherche votre demande...
+					:too_long => <<-END,
+La limite de caractères est de #{$HOUSTON_TEXT_LIM}. Merci de recommencer.
 END
-					:get_img=><<-END,
-Voici votre demande ! Vous convient-elle?
-END
-					:bad_img=><<-END,
-Je suis navré que l'image ne vous plaise pas.  #{Bot.emoticons[:confused]}
-Reprenons.
-END
-					:good_img=><<-END,
-Génial ! Je vous laisse alors partager cette image sur vos réseaux sociaux !
-END
-					:ask_wrong=><<-END,
-Hmmm... Je ne retrouve pas votre priorité... #{Bot.emoticons[:confused]}
-Reprenons.
-END
-					:ask_txt_answer=>"Ecrire",
-					:ask_txt=><<-END,
-D'après vous, quelle est la priorité en France ?
+# 					:ask_img_answer=>"Retrouver",
+# 					:ask_img=><<-END,
+# Je recherche votre demande...
+# END
+# 					:get_img=><<-END,
+# Voici votre demande ! Vous convient-elle?
+# END
+# 					:bad_img=><<-END,
+# Je suis navré que l'image ne vous plaise pas.  #{Bot.emoticons[:confused]}
+# Reprenons.
+# END
+# 					:good_img=><<-END,
+# Génial ! Je vous laisse alors partager cette image sur vos réseaux sociaux !
+# END
+# 					:ask_wrong=><<-END,
+# Hmmm... Je ne retrouve pas votre priorité... #{Bot.emoticons[:confused]}
+# Reprenons.
+# END
+					# :ask_txt_answer=>"Ecrire",
+					:ask_theme=><<-END,
+A quel thème pouvez-vous associer ce propos ?
 END
 					:end=><<-END,
 J'espère que vous êtes satifait(e) de moi. À bientôt !
@@ -115,53 +117,53 @@ END
 				:welcome=>{
 					:answer=>"houston/welcome_answer",
 					:disable_web_page_preview=>true,
-					:callback=>"houston/welcome",
-					:jump_to=>"houston/menu"
+					:callback=>"houston/welcome"
 				},
 				:menu=>{
 					:answer=>"houston/menu_answer",
-					:callback=>"houston/menu",
-					:parse_mode=>"HTML" ,
-					:kbd=>["houston/ask_img","houston/ask_txt"],
-					:kbd_options=>{:resize_keyboard=>true,:one_time_keyboard=>false,:selective=>true}
+					:callback=>"houston/welcome",
+					:parse_mode=>"HTML"
 				},
+				:too_long=> {
+					:callback=>"houston/too_long"
+				},
+				# :get_img=>{
+				# 	:callback=>"houston/get_img",
+				# 	:parse_mode=>"HTML",
+				# 	:kbd=>["houston/bad_img","houston/good_img"],
+				# 	:kbd_options=>{:resize_keyboard=>true,:one_time_keyboard=>false,:selective=>true}
+				# },
+				# :bad_img=>{
+				# 	:answer=>"houston/no",
+				# 	:jump_to=>"houston/ask_txt"
+				# },
+				# :good_img=>{
+				# 	:answer=>"houston/yes",
+				# 	:callback=>"houston/end"
+				# },
+				#
+				# :ask_img=>{
+				# 	:answer=>"houston/ask_img_answer",
+				# 	:callback=>"houston/ask_img"
+				# },
+				# :ask_wrong=>{
+				# 	:jump_to=>"houston/menu"
+				# },
+				:ask_themes=>{
+					:callback=>"houston/ask_themes"
+				},
+				:carousel=>{}
 
-				:get_img=>{
-					:callback=>"houston/get_img",
-					:parse_mode=>"HTML",
-					:kbd=>["houston/bad_img","houston/good_img"],
-					:kbd_options=>{:resize_keyboard=>true,:one_time_keyboard=>false,:selective=>true}
-				},
-				:bad_img=>{
-					:answer=>"houston/no",
-					:jump_to=>"houston/ask_txt"
-				},
-				:good_img=>{
-					:answer=>"houston/yes",
-					:callback=>"houston/end"
-				},
-
-				:ask_img=>{
-					:answer=>"houston/ask_img_answer",
-					:callback=>"houston/ask_img"
-				},
-				:ask_wrong=>{
-					:jump_to=>"houston/menu"
-				},
-				:ask_txt=>{
-					:answer=>"houston/ask_txt_answer",
-					:callback=>"houston/ask_txt"
-				}
 			}
 		}
 		Bot.updateScreens(screens)
 		Bot.updateMessages(messages)
-		Bot.addMenu({:houston=>{:menu=>{:kbd=>"houston/menu"}}})
+		# Bot.addMenu({:houston=>{:menu=>{:kbd=>"houston/menu"}}})
 	end
 
 	def houston_welcome(msg,user,screen)
 		Bot.log.info "#{__method__}"
-		screen=self.find_by_name("houston/welcome",self.get_locale(user))
+		#screen=self.find_by_name("houston/carousel",self.get_locale(user))
 		screen[:elements]= [
 			{
 				:title 		=> "Ecrivez votre doleance",
@@ -176,6 +178,7 @@ END
 				"image_url"  => "https://petersfancybrownhats.com/company_image.png"
 			}
 		]
+		user.next_answer('free_text',1,"houston_save_grievance")
 		return self.get_screen(screen,user,msg)
 	end
 
@@ -185,63 +188,95 @@ END
 		return self.get_screen(screen,user,msg)
 	end
 
-	def houston_menu(msg,user,screen)
-		Bot.log.info "#{__method__}"
-		screen[:kbd_del]=["houston/menu"] #comment if you want the houston button to be displayed on the houston menu
-		user.next_answer('free_text')
-		return self.get_screen(screen,user,msg)
-	end
+	# def houston_menu(msg,user,screen)
+	# 	Bot.log.info "#{__method__}"
+	# 	screen[:kbd_del]=["houston/menu"] #comment if you want the houston button to be displayed on the houston menu
+	# 	user.next_answer('free_text')
+	# 	return self.get_screen(screen,user,msg)
+	# end
 
-	def houston_ask_img(msg,user,screen)
-		Bot.log.info "#{__method__}"
-		# search for an image
-		# if image exists:
-		if 1==1 then
-			screen=self.find_by_name("houston/get_img",self.get_locale(user))
-		else
-			screen=self.find_by_name("houston/ask_wrong",self.get_locale(user))
-		end
-		return self.get_screen(screen,user,msg)
-	end
+	# def houston_ask_img(msg,user,screen)
+	# 	Bot.log.info "#{__method__}"
+	# 	# search for an image
+	# 	# if image exists:
+	# 	if 1==1 then
+	# 		screen=self.find_by_name("houston/get_img",self.get_locale(user))
+	# 	else
+	# 		screen=self.find_by_name("houston/ask_wrong",self.get_locale(user))
+	# 	end
+	# 	return self.get_screen(screen,user,msg)
+	# end
 
-	def houston_ask_txt(msg,user,screen)
+	def houston_save_grievance(msg,user,screen)
 		Bot.log.info "#{__method__}"
-		user.next_answer('free_text',1,"houston_save_txt")
-		return self.get_screen(screen,user,msg)
-	end
-
-	def houston_save_txt(msg,user,screen)
 		txt=user.state['buffer']
-		Bot.log.info "#{__method__}: #{txt}"
-		# process the text
-		# TODO
-		return self.houston_get_img(msg, user, screen)
-	end
-
-	def houston_get_img(msg,user,screen)
-		img=user.state['buffer']
-		Bot.log.info "#{__method__}: #{img}"
-		# TODO find the image associated to the user
-		screen=self.find_by_name("houston/get_img",self.get_locale(user))
-		screen[:text]=screen[:text] % {:img=>img}
-		buttons = {}
-		Bot.log.info "#{screen}"
-		user.next_answer('answer')
-		return self.get_screen(screen,user,msg)
-	end
-
-
-	def houston_save_email_cb(msg,user,screen)
-		email=user.state['buffer']
-		Bot.log.info "#{__method__}: #{email}"
-		if email.match(/\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/).nil? then
-			screen=self.find_by_name("houston/email_wrong",self.get_locale(user))
-			screen[:text]=screen[:text] % {:email=>email}
-			return self.get_screen(screen,user,msg)
+		if txt.length > $HOUSTON_TEXT_LIM
+			screen=self.find_by_name("houston/too_long",self.get_locale(user))
+		else
+			user.buffer = txt
+			screen=self.find_by_name("houston/ask_themes",self.get_locale(user))
 		end
-		screen=self.find_by_name("houston/email_saved",self.get_locale(user))
-		screen[:text]=screen[:text] % {:email=>email}
+		Bot.log.info "#{__method__}: #{txt}"
+		#Bot::Db.query("save_grievance", txt, user.id, theme)
+		#user.next_answer('free_text',1,"houston_save_txt")
 		return self.get_screen(screen,user,msg)
+	end
+
+	def houston_too_long(msg,user,screen)
+		user.next_answer('free_text',1,"houston_save_grievance")
+		return self.get_screen(screen,user,msg)
+	end
+
+	def houston_ask_themes(msg,user,screen)
+		Bot.log.info "#{__method__}"
+		screen[:buttons] = {
+			"type" 					=>"web_url",
+			"url"					=> "https://petersfancyapparel.com/criteria_selector",
+			"title"					=> "Select Criteria",
+			"webview_height_ratio"	=> "full",
+			"messenger_extensions"	=> false,
+			"fallback_url"			=> "https://petersfancyapparel.com/fallback"
+		}
+		user.next_answer('free_text',1,"houston_save_themes")
+		return self.get_screen(screen,user,msg)
+		#screen=self.find_by_name("houston/save_themes",self.get_locale(user))
+	end
+
+	# def houston_save_txt(msg,user,screen)
+	# 	txt=user.state['buffer']
+	# 	Bot.log.info "#{__method__}: #{txt}"
+	# 	# process the text
+	# 	# TODO
+	# 	return self.houston_get_img(msg, user, screen)
+	# end
+	#
+	# def houston_get_img(msg,user,screen)
+	# 	img=user.state['buffer']
+	# 	Bot.log.info "#{__method__}: #{img}"
+	# 	# TODO find the image associated to the user
+	# 	screen=self.find_by_name("houston/get_img",self.get_locale(user))
+	# 	screen[:text]=screen[:text] % {:img=>img}
+	# 	buttons = {}
+	# 	Bot.log.info "#{screen}"
+	# 	user.next_answer('answer')
+	# 	return self.get_screen(screen,user,msg)
+	# end
+	#
+	#
+	# def houston_save_email_cb(msg,user,screen)
+	# 	email=user.state['buffer']
+	# 	Bot.log.info "#{__method__}: #{email}"
+	# 	if email.match(/\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/).nil? then
+	# 		screen=self.find_by_name("houston/email_wrong",self.get_locale(user))
+	# 		screen[:text]=screen[:text] % {:email=>email}
+	# 		return self.get_screen(screen,user,msg)
+	# 	end
+	# 	screen=self.find_by_name("houston/email_saved",self.get_locale(user))
+	# 	screen[:text]=screen[:text] % {:email=>email}
+	# 	return self.get_screen(screen,user,msg)
+	# end
+	def houston_save_themes(screen, usr, msg)
+		return screen
 	end
 
 end

@@ -30,6 +30,7 @@ module Bot
 		attr_accessor :settings
 		attr_accessor :bot_upgrade
 		attr_accessor :bot
+		attr_accessor :buffer
 
 		# FSM
 		attr_accessor :state

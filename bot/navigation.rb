@@ -141,7 +141,7 @@ module Bot
 		end
 
 		def get_reset(msg, user)
-			Bot.log.info "#{__method__} #{msg.text}"
+			Bot.log.info "#{__method__} expect #{msg.text}"
 			_locale                 = self.get_locale(user)
 			user.state['current']   = "houston/welcome"
 			_screen                 = self.find_by_name(user.state['current'], _locale)
@@ -202,7 +202,8 @@ module Bot
 
 		# the message is not understood
 		def dont_understand(msg,user)
-			Bot.log.info "#{__method__} #{msg.text}"
+			_callback    = self.to_callback(user.state['callback'].to_s)
+			Bot.log.info "#{__method__} expect #{user.state['expected_input']} #{self.respond_to?(_callback)} and #{user.state['expected_size']}"
 			locale        = self.get_locale(user)
 			first_help    = user.settings['actions']['first_help_given']
 			if not first_help then
