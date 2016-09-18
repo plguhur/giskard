@@ -6,3 +6,5 @@ gem 'grape', '0.12.0'
 gem 'unicorn', '4.7.0'
 gem 'rack-cors'
 gem 'rest-client'
+gem 'rmagick'
+

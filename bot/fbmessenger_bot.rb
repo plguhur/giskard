@@ -25,10 +25,18 @@ module Giskard
 
 		def self.send(payload,type="messages",file_url=nil)
 			if file_url.nil? then
-				RestClient.post "https://graph.facebook.com/v2.6/me/#{type}?access_token=#{FB_PAGEACCTOKEN}", payload.to_json, :content_type => :json
+				begin
+					RestClient.post "https://graph.facebook.com/v2.6/me/#{type}?access_token=#{FB_PAGEACCTOKEN}", payload.to_json, :content_type => :json
+				rescue => e
+					Bot.log.info e.response
+				end
 			else # image upload # FIXME file upload does not work : 400 Bad Request
 				params={"recipient"=>payload['recipient'], "message"=>payload['message'], "filedata"=>File.new(file_url,'rb'),"multipart"=>true}
-				RestClient.post "https://graph.facebook.com/v2.6/me/#{type}?access_token=#{FB_PAGEACCTOKEN}",params
+				begin
+					RestClient.post "https://graph.facebook.com/v2.6/me/#{type}?access_token=#{FB_PAGEACCTOKEN}",params
+				rescue => e
+					Bot.log.info e.response
+				end
 			end
 		end
 

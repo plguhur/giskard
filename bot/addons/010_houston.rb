@@ -18,6 +18,7 @@
 
 $HOUSTON_TEXT_LIM = 200
 
+
 module Houston
 	def self.included(base)
 		Bot.log.info "loading Houston add-on"
@@ -81,6 +82,7 @@ END
 Que voulez-vous faire ?
 Utilisez les boutons du menu ci-dessous pour m'indiquer ce que vous souhaitez faire.
 END
+					:delivery => "Et voila !\n",
 					:too_long => <<-END,
 La limite de caractères est de #{$HOUSTON_TEXT_LIM}. Merci de recommencer.
 END
@@ -152,7 +154,10 @@ END
 				:ask_themes=>{
 					:callback=>"houston/ask_themes"
 				},
-				:carousel=>{}
+				:carousel=>{},
+				:delivery=>{ :jump_to=>"houston/end"},
+				:end=>{}
+
 
 			}
 		}
@@ -167,15 +172,15 @@ END
 		screen[:elements]= [
 			{
 				:title 		=> "Ecrivez votre doleance",
-				:image_url  => "https://petersfancybrownhats.com/company_image.png",
+				:image_url  => "http://guhur.net/img/megaphone.png",
 			},
 			{
-				"title" 		=> "Example 1",
-				"image_url"  => "https://petersfancybrownhats.com/company_image.png"
+				"title" 		=> "On a faim",
+				"image_url"  => "http://guhur.net/img/output.jpg"
 			},
 			{
-				"title" 		=> "Example 2",
-				"image_url"  => "https://petersfancybrownhats.com/company_image.png"
+				"title" 		=> "On a faim",
+				"image_url"  => "http://guhur.net/img/output.jpg"
 			}
 		]
 		user.next_answer('free_text',1,"houston_save_grievance")
@@ -234,16 +239,16 @@ END
 		      "type"			=> "template",
 		      "payload" 		=> {
 		        "template_type"		=> "button",
-		        "text"				=> "Themes",
+		        "text"				=> "A quel theme pouvez-vous l'associer ?",
 		        "buttons"			=> [{
 		            "type"				=> "postback",
-		            "title"				=> "Theme 1",
-		            "payload"			=> "tes1"
+		            "title"				=> "Societe",
+		            "payload"			=> "societe"
 		          },
 				  {
 					  "type" 					=> "postback",
-					  "title"					=> "Theme 2",
-					  "payload"				=> "theme_2"
+					  "title"					=> "Environnement",
+					  "payload"				=> "environnement"
 				  }]
 		      }
 		  }
@@ -252,12 +257,25 @@ END
 
 	end
 
-	def houston_save_themes(screen, usr, msg)
+	def houston_save_themes(msg, usr, screen)
 		# TODO save themes and grievances inside the database
+		theme = usr.state['buffer']
 
 		# create image
+		image_url = "https://s3.eu-central-1.amazonaws.com/laprimaire/themes/environnement.jpg"
+		output = "output.jpg"
+		image_name = create_image(usr.buffer, usr.first_name, image_url, output)
+
+		# FIXME send
+		bash_command = 'curl -F filedata=@%s -F recipient=\'{"id":"%s"}\' \
+		 			-F message=\'{"attachment":{"type":"image", "payload":{}}}\' \
+					https://graph.facebook.com/v2.7/me/messages?access_token=%s' % [output, usr.id, FB_PAGEACCTOKEN]
+		command_result = `#{bash_command}`
+		Bot.log.info bash_command
+		screen=self.find_by_name("houston/delivery",self.get_locale(usr))
 		return screen
 	end
+
 
 end
 

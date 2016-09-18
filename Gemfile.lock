@@ -69,6 +69,7 @@ GEM
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 3.0)
       netrc (~> 0.7)
+    rmagick (2.16.0)
     telegram-bot-ruby (0.4.1)
       httmultiparty
       persistent_httparty
@@ -98,5 +99,9 @@ DEPENDENCIES
   rack-cors
   rake
   rest-client
+  rmagick
   telegram-bot-ruby (= 0.4.1)
   unicorn (= 4.7.0)
+
+BUNDLED WITH
+   1.12.5
