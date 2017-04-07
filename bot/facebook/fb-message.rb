@@ -29,7 +29,7 @@ def initialize(messaging)
     self.id   = nil
     self.seq  = nil
     self.messenger = FB_BOT_NAME
-    self.timestamp = messaging.timestamp/1000
+    self.timestamp = messaging.timestamp.to_i/1000
     if not messaging.message.nil? then
         self.id   = messaging.message.mid
         self.seq  = messaging.message.seq

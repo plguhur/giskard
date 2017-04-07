@@ -89,7 +89,8 @@ module Giskard
 			params = [
 				@first_name,
 				@last_name,
-				@email
+				Time.now(),
+				Time.now()
 			]
 			res = Bot.db.query("user_insert", params)
 			@uid = res[0]['id'];
@@ -125,7 +126,6 @@ module Giskard
 				@uid,
 				@first_name,
 				@last_name,
-				@email,
 				Time.now()
 			]
 			Bot.db.query("user_update", params)
@@ -144,7 +144,6 @@ module Giskard
 			puts res[0]
 			@first_name = res[0]['first_name']
 			@last_name = res[0]['last_name']
-			@email = res[0]['email']
 		    @state['last_msg_id'] = res[0]['last_msg_id'].to_i
 			@state['current'] = YAML::dump(res[0]['current'])
 			@state['expected_input'] = res[0]['expected_input']
@@ -160,12 +159,11 @@ module Giskard
 		def self.load_queries
 		    queries={
 				"user_select" => "SELECT * FROM users, states where users.id=$1 and states.uid=$1",
-		        "user_insert"  => "INSERT INTO users (first_name, last_name, email) VALUES ($1, $2, $3) RETURNING id;",
+		        "user_insert"  => "INSERT INTO users (first_name, last_name, last_date, from_date) VALUES ($1, $2, $3, $4) RETURNING id;",
 		        "user_update"  => "UPDATE users SET
 						first_name=$2,
 						last_name=$3,
-		                email=$4,
-						last_date=$5
+						last_date=$4
 		                WHERE id=$1",
 		        "user_insert_state"  => "INSERT INTO states (uid, messenger) VALUES ($1, $2) RETURNING id;",
 		        "user_update_state"  => "UPDATE states SET
