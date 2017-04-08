@@ -46,7 +46,8 @@ module Test
             "name"=>"Newname"
           }
 
-          uri = URI.parse("https://graph.facebook.com/v2.8/#{FB_APPID}/accounts/test-users")
+          uri = URI.encode("https://graph.facebook.com/v2.8/#{FB_APPID}/accounts/test-users")
+          uri = URI.parse(uri)
 
           http = Net::HTTP.new(uri.host, uri.port)
           http.use_ssl = true
@@ -63,7 +64,8 @@ module Test
 
       # read informations about the test user
       def read
-          res              = URI.parse("https://graph.facebook.com/v2.8/#{@id}?fields=first_name,last_name&access_token=#{FB_APPTOKEN}").read
+          uri = URI.encode("https://graph.facebook.com/v2.8/#{@id}?fields=first_name,last_name&access_token=#{FB_APPTOKEN}")
+          res         = URI.parse(uri).read
           u           = JSON.parse(res)
           u           = JSON.parse(JSON.dump(u), object_class: OpenStruct)
           return u

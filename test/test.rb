@@ -14,7 +14,7 @@ require 'socket'
 user = Test::User.new
 puts "Creating a new test user"
 # user.create
-user.id = 114309842449147
+user.id = 111933986021812
 puts "Id: #{user.id}"
 puts "Reading informations about the user..."
 u = user.read
@@ -30,29 +30,19 @@ end
 
 
 
-# commands = ["accueil", "btn_mail", "ex_mail"]
-# s = TCPSocket.new 'localhost', 8080
-res = Test::Interface::sendCommand("home", user)
-# # puts "Answer: #{res}"
-#
-#
-#
-# while line = s.gets # Read lines from socket
-#   puts line         # and print them
-# end
-#
-# s.close             # close socket when done
 
 
-#
-# commands.each do |command|
-#     begin
-#         res = Test::Interface::sendCommand(command, user)
-#         puts res
-#         if not Test::Interface::correctAnswer?(command, user, res) then
-#             raise "Error: we did not receive the correct answer for #{command}"
-#         end
-#     rescue
-#         puts "Something went wrong..."
-#     end
-# end
+commands = ["home", "btn_mail", "ex_mail"]
+commands.each do |command|
+    begin
+        res = Test::Interface::sendCommand(command, user)
+        res = res[1..-2]
+        puts "Received: #{res}"
+        if not Test::Interface::correctAnswer?(command, user, res) then
+            answer = Test::Interface::answer(command)
+            raise "Error: we did not receive the correct answer for #{command} (correct answer: #{answer})"
+        end
+    rescue
+        puts "Something went wrong..."
+    end
+end

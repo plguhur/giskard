@@ -89,7 +89,8 @@ module Giskard
 				end
 			end
 
-			def process_msg(id,msg,options)
+			def process_msg(id,options)
+				msg = options[:text]
 				lines=msg.split("\n")
 				buffer=""
 				max=lines.length
@@ -129,6 +130,7 @@ module Giskard
 			end
 		end
 
+
 		# challenge for creating a webhook
 		get '/fbmessenger' do
 			if params['hub.verify_token']==FB_SECRET then
@@ -140,7 +142,8 @@ module Giskard
 
 		# we receive a new message
 		post '/fbmessenger' do
-			puts params
+			# puts params
+			# return "hello world!"
 			object 	    = params['object']
 			if object=='page' then
 				entries     = params['entry']
@@ -153,12 +156,14 @@ module Giskard
 						end
 						if not user.already_answered?(msg) and not msg.nil? then
 							screen        = Bot.nav.get(msg, user)
-							# send answer
-							process_msg(user.id,screen[:text],screen) unless screen[:text].nil?
+							process_msg(user.id,screen) unless screen[:text].nil?
+						elsif messaging.test then
+							screen        = Bot.nav.get(msg, user)
+							user.save
+							user = nil
+							msg = nil
+							return "#{screen[:text]}"
 						end
-						user.save
-						user = nil
-						msg = nil
 					end
 				end
 			elsif object=='api' then # api call / not from messenger
@@ -169,7 +174,7 @@ module Giskard
 				msg = Giskard::FB::Message.new(cmd)
 				user     = Giskard::FB::User.new(uid)
 				screen = Bot.nav.get(msg, user)
-				process_msg(user.id,screen[:text],screen) unless screen[:text].nil?
+				process_msg(user.id,screen) unless screen[:text].nil?
 			end
 		end # post
 	end # class

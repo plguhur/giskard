@@ -37,14 +37,16 @@ request.body = JSON.dump({
                             "mid"=> "mid.$cAAClhDrchvRhb5BED1bPkr7mJJ3A",
                             "seq"=> 92674,
                             "text"=> "Mon email"
-                        }
+                        },
+                        "test" => true
                     }
                 ]
             }
         ]
     })
 res=http.request(request)
-JSON.parse(res.body)
+puts res
+puts res.body
 
 
 #

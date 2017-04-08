@@ -26,15 +26,15 @@ module Test
     @@all_cmds = {
         "home" => [
             "accueil",
-            "Bonjour"
+            "Que voulez-vous faire ? Utilisez les boutons du menu ci-dessous pour m'indiquer ce que vous souhaitez faire.\\n"
         ],
         "btn_mail" => [
             "Mon email",
-            "Quel est votre email ?"
+            "Quel est votre email ?\\n"
         ],
         "ex_mail" => [
             "hello@world.com",
-            "Votre email est hello@world.com !"
+            "Votre email est hello@world.com !\\nQue voulez-vous faire ? Utilisez les boutons du menu ci-dessous pour m'indiquer ce que vous souhaitez faire.\\n"
         ]
     }
     def ask
@@ -69,7 +69,7 @@ To exit simply crtl-C.
         request.add_field('Content-Type', 'application/json')
         request.body = JSON.dump(message)
         res=http.request(request)
-        return JSON.parse(res.body)
+        return res.body
     end
 
     # send a defined command from json
@@ -94,7 +94,8 @@ To exit simply crtl-C.
                         "mid"=> "mid.$cAAClhDrchvRhb5BED1bPkr7mJJ3A",
                         "seq"=> user.seq,
 
-                    }
+                    },
+                    "test" => true
                 }
             ]
         }
@@ -102,19 +103,22 @@ To exit simply crtl-C.
                 'object' => "page",
                 'entry' => [ msg ]
             }
-        puts content
+        puts "Sending: #{content}"
         return send_fb(content)
     end
 
 
     def self.correctAnswer?(cmd_name, user, res)
-        cmd = all_cmds[cmd_name]
-        if res == cmd[1] then
+        cmd = @@all_cmds[cmd_name]
+        if res.to_s == cmd[1] then
             return true
         end
         return false
     end
 
+    def self.answer(cmd_name)
+        return @@all_cmds[cmd_name][1]
+    end
 
     end  # end class
 end # end module
