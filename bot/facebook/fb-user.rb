@@ -59,7 +59,13 @@ end
 def create
     @messenger = FB_BOT_NAME
     # get info from facebook
-    res              = URI.parse("https://graph.facebook.com/v2.8/#{@id}?fields=first_name,last_name&access_token=#{FB_PAGEACCTOKEN}").read
+    begin
+        uri = URI.encode("https://graph.facebook.com/v2.8/#{@id}?fields=first_name,last_name&access_token=#{FB_PAGEACCTOKEN}")
+        res              = URI.parse(uri).read
+    rescue # case of a test user
+        uri = URI.encode("https://graph.facebook.com/v2.8/#{@id}?fields=first_name,last_name&access_token=#{FB_APPTOKEN}")
+        res = URI.parse(uri).read
+    end
     r_user           = JSON.parse(res)
     r_user           = JSON.parse(JSON.dump(r_user), object_class: OpenStruct)
     @first_name  = r_user.first_name
