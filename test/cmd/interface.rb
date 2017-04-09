@@ -19,34 +19,13 @@
 
 module Test
   class Interface
-    attr_reader :output
-    attr_reader :input
     attr_reader :id_msg
-    attr_reader :order
-    attr_reader :commands
+    attr_accessor :order
+    attr_accessor :commands
 
-    def ask
-      print "> "
-      return STDIN.gets
-    end
-
-    def introduction
-      puts <<-eos
-Welcome to Giskard Simulator.
-To exit simply crtl-C.
-      eos
-    end
-
-    def repl
-      introduction
-      while true
-          looping
-      end
-    end
-
-    def looping
-        puts receive
-        send(ask)
+    def initialize
+        @order = []
+        @commands = {}
     end
 
     def send_fb(message)
@@ -114,6 +93,11 @@ To exit simply crtl-C.
         @commands = data_hash['commands']
     end
 
+    def save filename
+        open(filename, 'w') { |f|
+          f.puts JSON::dump({'order' => @order, 'commands' => @commands})
+        }
+    end
 
     end  # end class
 end # end module
