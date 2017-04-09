@@ -22,21 +22,9 @@ module Test
     attr_reader :output
     attr_reader :input
     attr_reader :id_msg
+    attr_reader :order
+    attr_reader :commands
 
-    @@all_cmds = {
-        "home" => [
-            "accueil",
-            "Que voulez-vous faire ? Utilisez les boutons du menu ci-dessous pour m'indiquer ce que vous souhaitez faire.\\n"
-        ],
-        "btn_mail" => [
-            "Mon email",
-            "Quel est votre email ?\\n"
-        ],
-        "ex_mail" => [
-            "hello@world.com",
-            "Votre email est hello@world.com !\\nQue voulez-vous faire ? Utilisez les boutons du menu ci-dessous pour m'indiquer ce que vous souhaitez faire.\\n"
-        ]
-    }
     def ask
       print "> "
       return STDIN.gets
@@ -49,7 +37,7 @@ To exit simply crtl-C.
       eos
     end
 
-    def initialize
+    def repl
       introduction
       while true
           looping
@@ -61,7 +49,7 @@ To exit simply crtl-C.
         send(ask)
     end
 
-    def self.send_fb(message)
+    def send_fb(message)
         uri = URI.parse("http://localhost:#{PORT_NUMBER}/#{FB_WEBHOOK_PREFIX}/fbmessenger")
 
         http = Net::HTTP.new(uri.host, uri.port)
@@ -73,8 +61,8 @@ To exit simply crtl-C.
     end
 
     # send a defined command from json
-    def self.sendCommand(cmd_name, user)
-        cmd = @@all_cmds[cmd_name]
+    def sendCommand(cmd_name, user)
+        cmd = @commands[cmd_name]
         user.id_msg += 1
         user.seq += 1
         msg = {
@@ -107,17 +95,25 @@ To exit simply crtl-C.
     end
 
 
-    def self.correctAnswer?(cmd_name, user, res)
-        cmd = @@all_cmds[cmd_name]
+    def correctAnswer?(cmd_name, user, res)
+        cmd = @commands[cmd_name]
         if res.to_s == cmd[1] then
             return true
         end
         return false
     end
 
-    def self.answer(cmd_name)
-        return @@all_cmds[cmd_name][1]
+    def answer(cmd_name)
+        return @commands[cmd_name][1]
     end
+
+    def load filename
+        file = File.read(filename)
+        data_hash = JSON.parse(file)
+        @order = data_hash['order']
+        @commands = data_hash['commands']
+    end
+
 
     end  # end class
 end # end module
