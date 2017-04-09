@@ -103,7 +103,6 @@ To exit simply crtl-C.
                 'object' => "page",
                 'entry' => [ msg ]
             }
-        puts "Sending: #{content}"
         return send_fb(content)
     end
 
