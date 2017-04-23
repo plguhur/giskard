@@ -25,7 +25,26 @@ module Giskard
             attr_accessor :id   # id in the database = id in Facebook
             attr_accessor :mail
             attr_accessor :last_msg_time
-
+            @queries={
+                "user_update_user"  => "UPDATE users SET
+                        first_name=$2,
+                        last_name=$3,
+                        last_date=$4
+                        WHERE id=$1",
+                "user_update_state" => "UPDATE states SET
+                        last_msg_id=$5,
+                        current=$6,
+                        expected_input=$7,
+                        expected_size=$8,
+                        buffer=$9,
+                        callback=$10,
+                        previous_screen=$11
+                        WHERE uid=$1",
+                'fb_user_select' => "SELECT * FROM users, states,fb_users where users.id=fb_users.uid and states.uid=fb_users.uid and fb_users.id = $1",
+                'fb_user_insert' => "INSERT INTO fb_users (uid, id, last_msg_time) VALUES ($1, $2, $3);",
+                'fb_user_update' => "UPDATE fb_users SET last_msg_time=$12 WHERE id=$1"
+            }
+            @queries['user_update'] = "with u as (#{@queries['user_update_user']}), v as (#{@queries['user_update_state']}) #{@queries['fb_user_update']}"
 
 def initialize(id)
     @id = id
@@ -38,20 +57,26 @@ end
 # return a nil if the user does not exist
 def load
     params = [
-        @id,
+        @id
     ]
     res = Bot.db.query("fb_user_select", params)
     if res.num_tuples.zero? then
         return false
     end
-    # @last_name = res[0]['last_name']
-    # @first_name = res[0]['first_name']
-    # @mail = res[0]['mail']
+
     @id = res[0]['id'].to_i
     @uid = res[0]['uid'].to_i
     @last_msg_time = DateTime.parse(res[0]['last_msg_time']).strftime('%s').to_i
     @messenger = FB_BOT_NAME
-    super
+    @first_name = res[0]['first_name']
+    @last_name = res[0]['last_name']
+    @state['last_msg_id'] = res[0]['last_msg_id'].to_i
+    @state['current'] = res[0]['current']
+    @state['expected_input'] = res[0]['expected_input']
+    @state['expected_size']= res[0]['expected_size'].to_i
+    @state['buffer'] = res[0]['buffer']
+    @state['callback']= res[0]['callback']
+    @state['previous_screen'] = res[0]['previous_screen']
     return true
 end
 
@@ -81,17 +106,14 @@ def create
         DateTime.strptime(@last_msg_time.to_s,'%s')
     ]
     Bot.db.query("fb_user_insert", params)
-
 end
 
 # save in the database the user with its fsm
 def save
     params = [
-        @id,
         DateTime.strptime(@last_msg_time.to_s,'%s')
     ]
-    Bot.db.query("fb_user_update", params)
-    super
+    super (params)
 end
 
 
@@ -110,14 +132,7 @@ end
 
 # database queries to prepare
 def self.load_queries
-    queries={
-        "fb_user_select" => "SELECT * FROM fb_users where id=$1",
-        "fb_user_insert"  => "INSERT INTO fb_users (id,uid, last_msg_time) VALUES ($1, $2, $3);",
-        "fb_user_update"  => "UPDATE fb_users SET
-                last_msg_time=$2
-                WHERE id=$1"
-    }
-    queries.each { |k,v| Bot.db.prepare(k,v) }
+    @queries.each { |k,v| Bot.db.prepare(k,v) }
 end
 
 

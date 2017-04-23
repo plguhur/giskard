@@ -30,10 +30,32 @@ module Giskard
 		attr_accessor :settings
 		attr_accessor :bot_upgrade
 		attr_accessor :messenger
+		attr_accessor :queries
 
 		# FSM
 		attr_accessor :state
 		attr_accessor :state_id
+
+		@queries={
+			"user_select" => "SELECT * FROM users, states where users.id=$1 and states.uid=$1",
+			"user_insert"  => "INSERT INTO users (first_name, last_name, last_date, from_date) VALUES ($1, $2, $3, $4) RETURNING id;",
+			"user_insert_state"  => "INSERT INTO states (uid, messenger) VALUES ($1, $2) RETURNING id;",
+			"user_update_user"  => "UPDATE users SET
+					first_name=$2,
+					last_name=$3,
+					last_date=$4
+					WHERE id=$1",
+			"user_update_state" => "UPDATE states SET
+					last_msg_id=$5,
+					current=$6,
+					expected_input=$7,
+					expected_size=$8,
+					buffer=$9,
+					callback=$10,
+					previous_screen=$11
+					WHERE uid=$1"}
+		@queries["user_update"] = "with u as (#{@queries['user_update_user']}) #{@queries['user_update_state']}"
+
 
 		def initialize()
 			@first_name = ""
@@ -107,27 +129,23 @@ module Giskard
 
 
 		# save the state
-		def save
+		def save (paramarg)
 
 			# current state
-			params = [
-		        @state['last_msg_id'],
-		        YAML::dump(@state['current']),
-		        @state['expected_input'],
-		        @state['expected_size'],
-				@state['buffer'],
-				@state['callback'],
-				YAML::dump(@state['previous_screen']),
-				@uid
-		    ]
-		    Bot.db.query("user_update_state", params)
-
 			params = [
 				@uid,
 				@first_name,
 				@last_name,
-				Time.now()
-			]
+				Time.now(),
+		        @state['last_msg_id'],
+		        @state['current'],
+		        @state['expected_input'],
+		        @state['expected_size'],
+				@state['buffer'],
+				@state['callback'],
+				@state['previous_screen']
+		    ]
+			params.push(*paramarg) unless paramarg.nil?
 			Bot.db.query("user_update", params)
 		end
 
@@ -137,49 +155,38 @@ module Giskard
 				@uid
 			]
 			res = Bot.db.query("user_select", params)
-			puts "Loading users... "
 			if res.num_tuples.zero? then
 		        return false
 		    end
-			puts res[0]
 			@first_name = res[0]['first_name']
 			@last_name = res[0]['last_name']
 		    @state['last_msg_id'] = res[0]['last_msg_id'].to_i
-			@state['current'] = YAML::dump(res[0]['current'])
+			@state['current'] = res[0]['current']
 			@state['expected_input'] = res[0]['expected_input']
 			@state['expected_size']= res[0]['expected_size'].to_i
 			@state['buffer'] = res[0]['buffer']
 			@state['callback']= res[0]['callback']
-			@state['previous_screen'] = YAML::dump(res[0]['previous_screen'])
+			@state['previous_screen'] = res[0]['previous_screen']
 		    return true
 		end
 
 
 		# database queries to prepare
 		def self.load_queries
-		    queries={
-				"user_select" => "SELECT * FROM users, states where users.id=$1 and states.uid=$1",
-		        "user_insert"  => "INSERT INTO users (first_name, last_name, last_date, from_date) VALUES ($1, $2, $3, $4) RETURNING id;",
-		        "user_update"  => "UPDATE users SET
-						first_name=$2,
-						last_name=$3,
-						last_date=$4
-		                WHERE id=$1",
-		        "user_insert_state"  => "INSERT INTO states (uid, messenger) VALUES ($1, $2) RETURNING id;",
-		        "user_update_state"  => "UPDATE states SET
-						last_msg_id=$1,
-						current=$2,
-						expected_input=$3,
-						expected_size=$4,
-						buffer=$5,
-						callback=$6,
-						previous_screen=$7
-						WHERE uid=$8"
-		    }
-		    queries.each { |k,v| Bot.db.prepare(k,v) }
+		    @queries.each { |k,v| Bot.db.prepare(k,v) }
 		end
 
+		def set(kw,val)
+			@state[kw]=val
+		end
 
+		def get(kw)
+			return @state[kw]
+		end
+
+		def unset(kw)
+			@state.delete(kw)
+		end
 
 	end # User
 end # Core

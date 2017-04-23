@@ -157,6 +157,9 @@ module Giskard
 						if not user.already_answered?(msg) and not msg.nil? then
 							screen        = Bot.nav.get(msg, user)
 							process_msg(user.id,screen) unless screen[:text].nil?
+							user.save
+							user = nil
+							msg = nil
 						elsif messaging.test then
 							screen        = Bot.nav.get(msg, user)
 							user.save
