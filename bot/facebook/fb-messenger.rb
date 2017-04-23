@@ -48,13 +48,15 @@ module Giskard
 				headers['Secret-Key']==FB_SECRET
 			end
 
+
 			def send_msg(id,text,kbd=nil,attachment=nil)
-				msg={"recipient"=>{"id"=>id}}
-				if not kbd.nil? then
-					msg["message"]={
-						"text"=>text,
-						"quick_replies"=>[]
-					}
+				msg={
+					"recipient"=>{"id"=>id},
+					"message"=>{}
+				}
+				msg["message"].merge!({"text"=>text}) if not text.nil?
+				if not kbd.nil?
+					msg["message"].merge!({"quick_replies"=>[]})
 					kbd.each do |k|
 						title=k['title'].nil? ? k['text'] : k['title']
 						payload=k['payload'].nil? ? k['text'] : k['payload']
@@ -67,13 +69,12 @@ module Giskard
 						qr["image_url"]=image_url unless image_url.nil?
 						msg["message"]["quick_replies"].push(qr)
 					end
-				elsif not attachment.nil? then
-					msg["message"]={ "attachment"=>attachment }
-				else
-					msg["message"]={ "text"=>text }
 				end
+				msg["message"].merge!({ "attachment"=>attachment }) if not attachment.nil?
+				msg.delete("message") if msg["message"].empty?
 				Giskard::FB::Messenger.send(msg)
 			end
+
 
 			def send_typing(id)
 				Giskard::FB::Messenger.send({"recipient"=>{"id"=>id},"sender_action"=>"typing_on"})
@@ -88,6 +89,53 @@ module Giskard
 					Giskard::FB::Messenger.send(payload,"messages",img_url)
 				end
 			end
+
+
+			def process_msg(id,msg,options)
+				lines=msg.split("\n")
+				buffer=""
+				max=lines.length
+				idx=0
+				image=false
+				kbd=nil
+				attachment=nil
+				lines.each do |l|
+					next if l.empty?
+					idx+=1
+					image=(l.start_with?("image:") && (['.jpg','.png','.gif','.jpeg'].include? File.extname(l)))
+					has_attachment=l.start_with?("attachment:")
+					if image && !buffer.empty? then # flush buffer before sending image
+						writing_time=buffer.length/TYPINGSPEED
+						send_typing(id)
+						sleep(writing_time)
+						send_msg(id,buffer)
+						buffer=""
+					end
+					if image then # sending image
+						send_typing(id)
+						send_image(id,l.split(":",2)[1])
+					else # sending 1 msg for every line
+						writing_time=l.length/TYPINGSPEED
+						writing_time=l.length/TYPINGSPEED_SLOW if max>1
+						send_typing(id)
+						sleep(writing_time)
+						if l.start_with?("no_preview:") then
+							l=l.split(':',2)[1]
+						end
+						if (idx==max) then
+							kbd=options[:kbd]
+						end
+						attachment=options[:attachments].shift() if has_attachment
+						Bot.log.info "l=#{l} attachment=#{has_attachment}"
+						if not has_attachment then
+							send_msg(id,l,kbd,nil)
+						else
+							send_msg(id,nil,nil,attachment)
+						end
+					end
+				end
+			end
+
 
 			def process_msg(id,options)
 				msg = options[:text]
