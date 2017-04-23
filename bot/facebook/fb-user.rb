@@ -109,10 +109,9 @@ def create
 end
 
 # save in the database the user with its fsm
-def save
-    params = [
-        DateTime.strptime(@last_msg_time.to_s,'%s')
-    ]
+def save(paramarg)
+    params = DateTime.strptime(@last_msg_time.to_s,'%s')
+    params += paramarg unless paramarg.nil?
     super (params)
 end
 

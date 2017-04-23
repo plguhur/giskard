@@ -170,6 +170,9 @@ module Giskard
 		    return true
 		end
 
+		def add(param)
+			@state['buffer'] += param
+		end
 
 		# database queries to prepare
 		def self.load_queries
