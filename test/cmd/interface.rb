@@ -16,6 +16,8 @@
    limitations under the License.
 =end
 
+# require 'net-http-spy'
+
 
 module Test
   class Interface
@@ -36,6 +38,9 @@ module Test
         request.add_field('Content-Type', 'application/json')
         request.body = JSON.dump(message)
         res=http.request(request)
+
+        # Net::HTTP.http_logger_options = {:body => true, :trace => true, :verbose=>true}
+
         return res.body
     end
 
@@ -53,12 +58,12 @@ module Test
                         "id"=> user.id
                     },
                     "recipient"=> {
-                        "id"=> "280888182276686"
+                        "id"=> FB_PAGEID
                     },
                     "timestamp"=> Time.now(),
                     "message"=> {
                         "text" => cmd[0],
-                        "mid"=> "mid.$cAAClhDrchvRhb5BED1bPkr7mJJ3A",
+                        "mid"=> "mid.$qwertyuiopasdfghjklzxcvbnm",
                         "seq"=> user.seq,
 
                     },

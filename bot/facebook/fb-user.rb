@@ -41,7 +41,7 @@ module Giskard
                         previous_screen=$11
                         WHERE uid=$1",
                 'fb_user_select' => "SELECT * FROM users, states,fb_users where users.id=fb_users.uid and states.uid=fb_users.uid and fb_users.id = $1",
-                'fb_user_insert' => "INSERT INTO fb_users (uid, id, last_msg_time) VALUES ($1, $2, $3);",
+                'fb_user_insert' => "INSERT INTO fb_users (uid, id, last_msg_time) VALUES ($2, $1, $3);",
                 'fb_user_update' => "UPDATE fb_users SET last_msg_time=$12 WHERE id=$1"
             }
             @queries['user_update'] = "with u as (#{@queries['user_update_user']}), v as (#{@queries['user_update_state']}) #{@queries['fb_user_update']}"
@@ -109,7 +109,7 @@ def create
 end
 
 # save in the database the user with its fsm
-def save(paramarg)
+def save(paramarg = nil)
     params = DateTime.strptime(@last_msg_time.to_s,'%s')
     params += paramarg unless paramarg.nil?
     super (params)

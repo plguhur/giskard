@@ -190,8 +190,7 @@ module Giskard
 
 		# we receive a new message
 		post '/fbmessenger' do
-			# puts params
-			# return "hello world!"
+			puts params.to_json
 			object 	    = params['object']
 			if object=='page' then
 				entries     = params['entry']

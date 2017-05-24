@@ -8,6 +8,19 @@ CHECK(
    VALUE IN (NULL, 'm', 'f')
 );
 
+
+CREATE TABLE users (
+    id serial primary key,
+    first_name character varying(30),
+    last_name character varying(30),
+    email character varying(30),
+    from_date timestamp without time zone DEFAULT now(),
+    last_date timestamp without time zone DEFAULT now(),
+    CONSTRAINT users_check
+        CHECK (last_date >= from_date)
+);
+
+
 CREATE TABLE fb_users (
     id bigint primary key,
     uid integer,
@@ -31,17 +44,6 @@ CREATE TABLE tg_users (
     ON DELETE CASCADE
 );
 
-
-CREATE TABLE users (
-    id serial primary key,
-    first_name character varying(30),
-    last_name character varying(30),
-    email character varying(30),
-    from_date timestamp without time zone DEFAULT now(),
-    last_date timestamp without time zone DEFAULT now(),
-    CONSTRAINT users_check
-        CHECK (last_date >= from_date)
-);
 
 
 CREATE VIEW maxi_users
